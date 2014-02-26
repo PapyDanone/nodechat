@@ -1,23 +1,35 @@
 var MessagesView = Backbone.View.extend({
+	
+	tagName: "ul",
+	
+	className: "messages",
 
     initialize: function (options) {
     	console.debug('initialize');
+    	_.bindAll(this, 'addMessageView', 'addBroadCastMessage');
     	this.vent = options.vent;
+    	this.socket = options.socket;
         this.render();
-        this.listenTo(this.collection, "add", this.addMessageView, this);
+        this.listenTo(this.collection, "add", this.addMessageView);
+        this.listenTo(this.socket, "new_message", this.addBroadCastMessage);
     },
     
     addMessageView: function(message) {
     	
-    	var view = new MessageView({model: message, vent: this.vent}).render();
+    	var view = new MessageView({model: message, vent: this.vent});
     	
     	$(this.el).append(view.el);
+    },
+    
+    addBroadCastMessage: function (object) {
+    	
+    	this.addMessageView(new Message(object));
     },
 
     render: function () {
     	console.debug('rendering Messages'); 
     	
-    	_.each(this.collection.models, this.addMessageView, this);
+    	_.each(this.collection.models, this.addMessageView);
 
         return this;
     }
@@ -36,6 +48,7 @@ var MessageView = Backbone.View.extend({
     	this.vent = options.vent;
         this.model.bind("change", this.render, this);
         this.model.bind("destroy", this.remove, this);
+        this.render();
     },
 
     render: function () {
@@ -62,14 +75,20 @@ var MessageView = Backbone.View.extend({
 });
 
 var MessageFormView = Backbone.View.extend({
+	
+	tagName: "div",
+	
+	className: "messageForm",
 
     initialize: function (options) {
+    	console.debug('initializing form');
     	_.bindAll(this, "editMessage");
     	options.vent.bind('editMessage', this.editMessage);
         this.render();
     },
 
     render: function () {
+    	console.debug('rendering form');
     	$(this.el).html(this.template(this.model.toJSON()));
 
         return this;
@@ -112,11 +131,11 @@ var MessageFormView = Backbone.View.extend({
 
     saveMessage: function () {
         var self = this;
-        console.log('before save');
         this.collection.create(
         	this.model, {
 	            success: function (model) {
 	                //app.navigate('wines/' + model.id, false);
+	            	socket.emit('message', self.model);
 	                utils.showAlert('Success!', 'Message saved successfully', 'alert-success');
 	                self.model = new Message();
 	                self.render();

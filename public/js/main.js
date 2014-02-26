@@ -2,36 +2,46 @@ var AppRouter = Backbone.Router.extend({
 
     routes: {
         //""            : "home",
-        "messages"	  : "list"
+        "messages"	    : "list",
+        "messages/:id"	: "detail"
     },
 
     initialize: function () {
         //$('.header').html(this.headerView.el);
-    	var message = new Message();
-    	this.messages = new MessageCollection();
-    	
-        $("#messageForm").html(new MessageFormView({
-    		model: message, 
-    		collection: this.messages,
-    		vent: vent
-    	}).el);
     },
 
 	list: function() {
         
-        var self = this;
+    	var messages = new MessageCollection();
         
-        this.messages.fetch({
+        messages.fetch({
         	success: function() {
-        		$(".messages").html(new MessagesView({
-        			collection: self.messages, 
-        			vent: vent
+        		$("#content").prepend(new MessagesView({
+        			collection: messages, 
+        			vent: vent,
+        			socket: socket
         		}).el);
         	},
         	error: function() {
         		console.debug('sa mer SEGPA');
         	}
         });
+        
+        var view = new MessageFormView({
+    		model: new Message(), 
+    		collection: messages,
+    		vent: vent
+    	});
+    	
+    	$("#content").html(view.el);
+    },
+    
+    detail: function (id) {
+        var message = new Message({_id: id});
+        message.fetch({success: function(){
+            $("#content").html(new MessageView({model: message, vent: vent}).el);
+        }});
+        //this.headerView.selectMenuItem();
     }
 
 });
@@ -57,3 +67,5 @@ _.template.formatdate = function (stamp) {
          ]; 
     return day_fragments.join('/') + ' ' + time_fragments.join(':');
 };
+
+var socket = io.connect('http://localhost:3000');

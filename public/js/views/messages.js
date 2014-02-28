@@ -48,6 +48,7 @@ var MessageView = Backbone.View.extend({
     	this.vent = options.vent;
         this.model.bind("change", this.render, this);
         this.model.bind("destroy", this.remove, this);
+        this.model.bind("remove", this.remove, this);
         this.render();
     },
 

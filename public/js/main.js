@@ -19,7 +19,7 @@ var AppRouter = Backbone.Router.extend({
         		$("#content").prepend(new MessagesView({
         			collection: messages, 
         			vent: vent,
-        			socket: socket
+        			socket: window.socket
         		}).el);
         	},
         	error: function() {
@@ -68,4 +68,4 @@ _.template.formatdate = function (stamp) {
     return day_fragments.join('/') + ' ' + time_fragments.join(':');
 };
 
-var socket = io.connect('http://localhost:3000');
+window.socket = io.connect('http://localhost:3000');

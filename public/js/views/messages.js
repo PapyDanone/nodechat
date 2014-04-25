@@ -6,32 +6,40 @@ var MessagesView = Backbone.View.extend({
 
     initialize: function (options) {
     	console.debug('initialize');
-    	_.bindAll(this, 'addMessageView', 'addBroadCastMessage');
+    	_.bindAll(this, 'addMessageView');
     	this.vent = options.vent;
     	this.socket = options.socket;
         this.render();
-        this.listenTo(this.collection, "add", this.addMessageView);
-        this.listenTo(this.socket, "new_message", this.addBroadCastMessage);
+        var self= this;
+        this.listenTo(this.collection, "add", function (message) {
+        	self.addMessageView(message, true);
+        });
     },
     
-    addMessageView: function(message) {
+    addMessageView: function(message, scroll) {
     	
     	var view = new MessageView({model: message, vent: this.vent});
     	
     	$(this.el).append(view.el);
-    },
-    
-    addBroadCastMessage: function (object) {
     	
-    	this.addMessageView(new Message(object));
+    	if (scroll == true) {
+    		this.scroll();
+    	}
     },
 
     render: function () {
     	console.debug('rendering Messages'); 
+    	var self= this;
     	
-    	_.each(this.collection.models, this.addMessageView);
+    	_.each(this.collection.models, function (message) {
+    		self.addMessageView(message, false);
+        });
 
         return this;
+    },
+    
+    scroll: function () {
+    	$('#content').animate({ scrollTop: $('#content')[0].scrollHeight }, 'slow');
     }
 });
 
@@ -79,7 +87,7 @@ var MessageFormView = Backbone.View.extend({
 	
 	tagName: "div",
 	
-	className: "messageForm",
+	id: "messageForm",
 
     initialize: function (options) {
     	console.debug('initializing form');
@@ -135,9 +143,7 @@ var MessageFormView = Backbone.View.extend({
         this.collection.create(
         	this.model, {
 	            success: function (model) {
-	                //app.navigate('wines/' + model.id, false);
-	            	socket.emit('message', self.model);
-	                utils.showAlert('Success!', 'Message saved successfully', 'alert-success');
+	                //utils.showAlert('Success!', 'Message saved successfully', 'alert-success');
 	                self.model = new Message();
 	                self.render();
 	            },

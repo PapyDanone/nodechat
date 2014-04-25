@@ -17,10 +17,6 @@ window.Message = Backbone.Model.extend({
         this.validators.message = function (value) {
             return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a message"};
         };
-
-        this.validators.author = function (value) {
-            return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a name"};
-        };
         
         /* if we are creating a new model to push to the server we don't want
          * to iobind as we only bind new models from the server. This is because
@@ -54,7 +50,7 @@ window.Message = Backbone.Model.extend({
 
     defaults: {
         _id: null,
-        author: "",
+        author: "default",
         message: "",
         date: new Date().getTime()
     },
@@ -99,6 +95,7 @@ window.MessageCollection = Backbone.Collection.extend({
     },
       
     serverCreate: function (data) {
+    	console.debug('serverCreate called');
 	    // make sure no duplicates, just in case
 	    var exists = this.get(data._id);
 	    

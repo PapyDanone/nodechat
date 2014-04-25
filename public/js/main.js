@@ -1,39 +1,52 @@
 var AppRouter = Backbone.Router.extend({
 
     routes: {
-        //""            : "home",
-        "messages"	    : "list",
+        ""              : "home",
+        "chatroom"	    : "list",
         "messages/:id"	: "detail"
     },
 
     initialize: function () {
-        //$('.header').html(this.headerView.el);
+    	this.headerView = new HeaderView();
+        $('body').append(this.headerView.el);
+    },
+    
+    home: function () {
+    	$("#content").html(new HomeView().el);
+    	$("#messageForm").remove();
+    	this.headerView.selectMenuItem('home');
     },
 
 	list: function() {
+		
+		this.headerView.selectMenuItem('chatroom');
         
     	var messages = new MessageCollection();
         
         messages.fetch({
         	success: function() {
-        		$("#content").prepend(new MessagesView({
+        		
+        		var msgView = new MessagesView({
         			collection: messages, 
         			vent: vent,
         			socket: window.socket
-        		}).el);
+        		});
+        		
+        		$("#content").html(msgView.el);
+        		msgView.scroll();
+        		
+        		var view = new MessageFormView({
+            		model: new Message(), 
+            		collection: messages,
+            		vent: vent
+            	});
+            	
+            	$("div[role=main]").after(view.el);
         	},
         	error: function() {
         		console.debug('sa mer SEGPA');
         	}
         });
-        
-        var view = new MessageFormView({
-    		model: new Message(), 
-    		collection: messages,
-    		vent: vent
-    	});
-    	
-    	$("#content").html(view.el);
     },
     
     detail: function (id) {
@@ -46,7 +59,7 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-utils.loadTemplate(['MessageView', 'MessageFormView'], function() {
+utils.loadTemplate(['HomeView', 'HeaderView', 'MessageView', 'MessageFormView'], function() {
     app = new AppRouter();
     Backbone.history.start();
 });

@@ -16,6 +16,8 @@ db.open(function(err, db) {
                 populateDB();
             }
         });
+    } else {
+        console.dir(err);
     }
 });
 

@@ -22,34 +22,3 @@ app.delete('/messages/:id', message.deleteMessage);
 server.listen(app.get('port'), function () {
     console.log("Express server listening on port " + app.get('port'));
 });
-
-/**
- * Init
- */
-var isClientConnected = false;
-var clientCount = 0;
-
-/**
- * Client actions
- */
-io.sockets.on('connection', function (socket) {
-	
-	isClientConnected = true;
-	clientCount++;
-	
-	socket.on('message', function(message){
-		var requesterId = socket.id;
-		console.log('Server received: ');
-		console.dir(message);
-		// send message to everyone BUT the requester
-		socket.broadcast.emit('new_message', message);
-	});
-	
-	socket.on('disconnect', function(){
-		clientCount--;
-		if (clientCount == 0) {
-			isClientConnected = false; // no one is connected anymore, notify Arduino
-		}
-	});
-  
-});

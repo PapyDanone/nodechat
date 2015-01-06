@@ -8,10 +8,8 @@ var MessagesView = Backbone.View.extend({
     	console.debug('initialize');
     	_.bindAll(this, 'addMessageView', 'addBroadCastMessage');
     	this.vent = options.vent;
-    	this.socket = options.socket;
         this.render();
         this.listenTo(this.collection, "add", this.addMessageView);
-        this.listenTo(this.socket, "new_message", this.addBroadCastMessage);
     },
     
     addMessageView: function(message) {
@@ -134,8 +132,6 @@ var MessageFormView = Backbone.View.extend({
         this.collection.create(
         	this.model, {
 	            success: function (model) {
-	                //app.navigate('wines/' + model.id, false);
-	            	socket.emit('message', self.model);
 	                utils.showAlert('Success!', 'Message saved successfully', 'alert-success');
 	                self.model = new Message();
 	                self.render();

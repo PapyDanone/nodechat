@@ -18,12 +18,11 @@ var AppRouter = Backbone.Router.extend({
         	success: function() {
         		$("#content").prepend(new MessagesView({
         			collection: messages, 
-        			vent: vent,
-        			socket: socket
+        			vent: vent
         		}).el);
         	},
         	error: function() {
-        		console.debug('sa mer SEGPA');
+        		console.debug('cant fetch messages');
         	}
         });
         
@@ -67,5 +66,3 @@ _.template.formatdate = function (stamp) {
          ]; 
     return day_fragments.join('/') + ' ' + time_fragments.join(':');
 };
-
-var socket = io.connect('http://localhost:3000');
